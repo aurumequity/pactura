@@ -36,3 +36,6 @@ Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
+
+# lockfiles we do not track
+/frontend/package-lock.json
