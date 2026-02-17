@@ -39,3 +39,6 @@ Thumbs.db
 
 # lockfiles we do not track
 /frontend/package-lock.json
+
+# Firebase Administrative Key
+service-account.json

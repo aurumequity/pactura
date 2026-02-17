@@ -154,4 +154,30 @@ flowchart TB
 
   C[Cloud Scheduler<br/>Retention Job] --> A
 
-  
+## Pactura "Trust Flow" Diagram
+
+  sequenceDiagram
+    participant User as User (Next.js)
+    participant Auth as Firebase Auth
+    participant API as NestJS API (Cloud Run)
+    participant DB as Cloud SQL (Postgres)
+    participant BC as Blockchain (Alchemy)
+
+    User->>Auth: Login / Get ID Token
+    Auth-->>User: ID Token (with orgId claim)
+    
+    User->>API: Upload Contract (Bearer Token)
+    API->>API: FirebaseAuthGuard (Verify & Extract orgId)
+    
+    API->>DB: Save Document + Metadata
+    API->>API: Generate SHA-256 Hash
+    
+    par Async Processing
+        API->>BC: Anchor Hash (BlockchainService)
+        BC-->>API: Return TxID
+        API->>DB: Update Document with blockchainTxId
+    and Audit Logging
+        API->>DB: Create Hash-Linked Audit Entry
+    end
+
+    API-->>User: 201 Created (Document Secured)

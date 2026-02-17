@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-node"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id        String     @id @default(uuid())
+  name      String
+  createdAt DateTime   @default(now())
+  documents Document[]
+  users     User[]
+}
+
+model User {
+  id        String       @id // This will be your Firebase UID
+  email     String       @unique
+  orgId     String
+  organization Organization @relation(fields: [orgId], references: [id])
+}
+
+model Document {
+  id             String       @id @default(uuid())
+  title          String
+  content        String       @db.Text
+  orgId          String
+  organization   Organization @relation(fields: [orgId], references: [id])
+  
+  // Fields for your 3-week "Innovation" goals
+  classification String       @default("PUBLIC")
+  blockchainTxId String?      @unique
+  contentHash    String?
+}
