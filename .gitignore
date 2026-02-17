@@ -23,6 +23,8 @@ build/
 # Logs
 logs/
 *.log
+firebase-debug.log
+firestore-debug.log
 
 # OS files
 .DS_Store

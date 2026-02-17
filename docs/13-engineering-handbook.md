@@ -92,6 +92,16 @@ firebase --version
 
 ---
 
+## Local endpoints
+
+Web: http://localhost:3000
+API: http://localhost:8081
+
+Firebase Emulator UI: http://localhost:4000
+Auth emulator: 127.0.0.1:9099
+Firestore emulator: 127.0.0.1:8080
+Storage emulator: 127.0.0.1:9199
+
 ## 5. Firebase Console Setup
 
 This section assumes you are starting from zero.
