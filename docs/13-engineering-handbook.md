@@ -102,6 +102,37 @@ Auth emulator: 127.0.0.1:9099
 Firestore emulator: 127.0.0.1:8080
 Storage emulator: 127.0.0.1:9199
 
+4.2 Database Setup (PostgreSQL)
+To support AI features and contract intelligence, Pactura uses PostgreSQL with the pgvector extension.
+
+Requirements
+
+Postgres.app: Recommended for macOS.
+
+Prisma 7.x: The current ORM version used in the API.
+
+Initial Role & Permission Setup
+If you encounter "Access Denied" errors during migration, you must grant your system user superuser permissions within the Postgres terminal:
+
+Open Postgres.app and enter the psql console.
+
+Run the following:
+
+SQL
+CREATE ROLE your_username WITH LOGIN SUPERUSER;
+CREATE DATABASE pactura_db;
+Prisma 7 Configuration
+Prisma 7 requires a decoupled configuration for security and environment flexibility:
+
+Define the schema structure in api/prisma/schema.prisma.
+
+Remove the url line from the datasource block in the schema file.
+
+Configure the connection in api/prisma.config.ts using dotenv/config.
+
+Ensure api/.env contains:
+DATABASE_URL="postgresql://localhost:5432/pactura_db?schema=public"
+
 ## 5. Firebase Console Setup
 
 This section assumes you are starting from zero.
@@ -304,6 +335,19 @@ Current v1 implementation shape
 
 * Auth middleware verifies token on protected routes
 * Health and ops routes are excluded
+
+9.2 Organization Branding (Custom Claims)
+We use Firebase Custom Claims to "bake" the orgId into the user's identity token. This ensures logical multi-tenancy that cannot be spoofed by the frontend.
+
+The "Stamp" Script
+To associate a test user with an organization, run the administrative script from the root:
+
+Bash
+# Ensure you are in the project root
+npx ts-node scripts/set-custom-claims.ts
+Input: User UID from the Firebase Console and a sample orgId (e.g., aurum-equity-test-001).
+
+Result: The user's JWT will now contain the orgId, which is automatically extracted by the API's FirebaseAuthGuard.
 
 ---
 
@@ -606,6 +650,24 @@ Before committing
 * Ensure RBAC action mapped
 * Ensure audit event added for protected actions
 * Update documentation if architecture changes
+
+Prisma 7 Schema Validation (P1012/P1013)
+
+Issue: Prisma 7.4.0 throws a validation error if the database URL is defined inside the .prisma file.
+
+Resolution: Decouple the config by moving the URL logic to prisma.config.ts.
+
+Local Postgres "Access Denied"
+
+Issue: Local Mac users often lack the permissions to create databases via the CLI.
+
+Resolution: Manually create a SQL role with SUPERUSER status matching the local system username.
+
+Nested Git Repositories
+
+Issue: NestJS CLI can accidentally initialize a hidden .git folder inside the /api directory.
+
+Resolution: Delete api/.git to ensure the monorepo tracks the folder correctly.
 
 ---
 
