@@ -639,6 +639,12 @@ Blocked end-to-end auth validation.
 Resolution
 Align emulator usage across frontend and API, and ensure API loads env vars before initializing firebase-admin.
 
+Firebase Admin Scripting (ESM Conflict): When running administrative scripts with ts-node in a modern ESM environment, checking admin.apps.length can sometimes return undefined and crash the process.
+
+The "Fail-Safe" Pattern: Instead of checking for initialization, use a try/catch block around admin.initializeApp(). This ensures the script continues even if the app is already running, which is more robust for local development.
+
+Direct Access: Accessing admin.auth() directly within the execution function, rather than assigning it to a top-level constant, avoids "not a function" errors caused by asynchronous loading of the Admin SDK.
+
 ---
 
 ## 18. Contribution Guidelines

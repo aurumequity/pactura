@@ -31,7 +31,7 @@ async function setTenantClaim(uid: string, orgId: string) {
 }
 
 // Ensure these match your actual data
-const TEST_USER_UID = 'rDibee1aYLSX5aabbSnIY3QnJVo1'; 
+const TEST_USER_UID = 'hYtbd0v24n28P2hhepl5WGT3kh78'; 
 const SAMPLE_ORG_ID = 'aurum-equity-test-001';
 
 setTenantClaim(TEST_USER_UID, SAMPLE_ORG_ID);
