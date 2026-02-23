@@ -3,11 +3,12 @@ import { FirebaseService } from './services/firebase.service'
 import { AuthMiddleware } from './common/middleware/auth.middleware'
 import { HealthController } from './health.controller'
 import { WhoAmIModule } from './modules/whoami/whoami.module'
+import { OrgsModule } from '../api/src/modules/orgs/orgs.module'
 
 @Module({
   controllers: [HealthController],
   providers: [FirebaseService],
-  imports: [WhoAmIModule],
+  imports: [WhoAmIModule, OrgsModule],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

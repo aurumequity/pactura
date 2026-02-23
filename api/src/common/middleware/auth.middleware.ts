@@ -1,12 +1,12 @@
 import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common'
-import { Request, Response, NextFunction } from 'express'
+import { FastifyRequest, FastifyReply } from 'fastify'
 import { FirebaseService } from '../../services/firebase.service'
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
   constructor(private firebaseService: FirebaseService) {}
 
-  async use(req: Request, res: Response, next: NextFunction) {
+async use(req: FastifyRequest, res: FastifyReply, next: () => void) {
     const authHeader = req.headers.authorization
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
