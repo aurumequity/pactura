@@ -42,3 +42,5 @@ Thumbs.db
 
 # Scripts for building project that we do not track
 /scripts/
+
+# API dist folder
