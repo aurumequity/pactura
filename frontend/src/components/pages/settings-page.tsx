@@ -37,7 +37,7 @@ export function SettingsPage() {
             <Label htmlFor="org-name">Organization Name</Label>
             <Input
               id="org-name"
-              placeholder="[Org Name]"
+              placeholder="e.g. ACME Corporation"
               defaultValue="[Org Name]"
             />
           </div>
