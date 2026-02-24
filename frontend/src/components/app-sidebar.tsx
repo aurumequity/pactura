@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 
 const navItems = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Documents", href: "/documents", icon: FileText },
   { label: "Settings", href: "/settings", icon: Settings },
 ]
