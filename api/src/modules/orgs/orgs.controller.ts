@@ -6,7 +6,7 @@ export class OrgsController {
   constructor(private readonly orgsService: OrgsService) {}
 
   @Get()
-async getOrgs(@Req() req: any) {
-  return this.orgsService.getOrgsForUser(req.raw.user.userId);
-}
+  async getOrgs(@Req() req: any) {
+    return this.orgsService.getOrgsForUser(req.raw.user.uid);
+  }
 }

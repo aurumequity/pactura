@@ -1,7 +1,8 @@
 "use client"
+
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, FileText, Settings, LogOut, ShieldCheck } from "lucide-react"
+import { LayoutDashboard, FileText, Settings, LogOut, ShieldCheck, Building2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -15,10 +16,11 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname()
-  const { logout } = useAuth()
+  const { logout, org } = useAuth()
 
   return (
     <aside className="flex h-screen w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
+      {/* Product branding */}
       <div className="flex items-center gap-3 px-6 py-5">
         <div className="flex size-9 items-center justify-center rounded-lg bg-sidebar-accent">
           <ShieldCheck className="size-5 text-accent" />
@@ -32,7 +34,27 @@ export function AppSidebar() {
           </span>
         </div>
       </div>
+
       <Separator className="bg-sidebar-border" />
+
+      {/* Org context */}
+      {org && (
+        <div className="flex items-center gap-2 px-6 py-3">
+          <Building2 className="size-4 shrink-0 text-sidebar-foreground/50" />
+          <div className="flex flex-col min-w-0">
+            <span className="truncate text-xs font-medium text-sidebar-accent-foreground">
+              {org.name}
+            </span>
+            <span className="text-xs text-sidebar-foreground/50 capitalize">
+              {org.role}
+            </span>
+          </div>
+        </div>
+      )}
+
+      <Separator className="bg-sidebar-border" />
+
+      {/* Nav */}
       <nav className="flex flex-1 flex-col gap-1 px-3 py-4" role="navigation" aria-label="Main navigation">
         {navItems.map((item) => {
           const isActive = pathname === item.href
@@ -54,7 +76,10 @@ export function AppSidebar() {
           )
         })}
       </nav>
+
       <Separator className="bg-sidebar-border" />
+
+      {/* Sign out */}
       <div className="px-3 py-4">
         <Button
           variant="ghost"

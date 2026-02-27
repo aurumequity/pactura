@@ -1,42 +1,44 @@
 import { Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 
+export interface OrgResult {
+  id: string;
+  name: string;
+  slug: string | null;
+  plan: string | null;
+  role: string;
+}
+
 @Injectable()
 export class OrgsService {
   private db = admin.firestore();
 
-  async getOrgsForUser(uid: string) {
-    const membershipsSnap = await this.db
-      .collectionGroup('memberships')
-      .where('uid', '==', uid)
-      .where('status', '==', 'active')
-      .get();
+  async getOrgsForUser(uid: string): Promise<OrgResult[]> {
+    const orgsSnap = await this.db.collection('orgs').get();
+    if (orgsSnap.empty) return [];
 
-    if (membershipsSnap.empty) return [];
+    const results: OrgResult[] = [];
 
-    const membershipsByOrgId = new Map<string, string>();
-    for (const doc of membershipsSnap.docs) {
-      const data = doc.data();
-      membershipsByOrgId.set(data.orgId, data.role);
+    for (const orgDoc of orgsSnap.docs) {
+      const memberSnap = await this.db
+        .collection('orgs')
+        .doc(orgDoc.id)
+        .collection('memberships')
+        .doc(uid)
+        .get();
+
+      if (memberSnap.exists && memberSnap.data()?.status === 'active') {
+        const data = orgDoc.data();
+        results.push({
+          id: orgDoc.id,
+          name: data.name,
+          slug: data.slug ?? null,
+          plan: data.plan ?? null,
+          role: memberSnap.data()?.role ?? 'member',
+        });
+      }
     }
 
-    const orgRefs = [...membershipsByOrgId.keys()].map((orgId) =>
-      this.db.collection('orgs').doc(orgId),
-    );
-
-    const orgSnaps = await this.db.getAll(...orgRefs);
-
-    return orgSnaps
-      .filter((snap) => snap.exists)
-      .map((snap) => {
-        const data = snap.data()!;
-        return {
-          id: snap.id,
-          name: data.name,
-          slug: data.slug,
-          plan: data.plan,
-          role: membershipsByOrgId.get(snap.id) ?? 'member',
-        };
-      });
+    return results;
   }
 }

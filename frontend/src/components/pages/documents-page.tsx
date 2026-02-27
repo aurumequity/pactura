@@ -7,6 +7,7 @@ import { Upload, FileText, AlertCircle, Loader2 } from "lucide-react";
 import { apiGet, apiPost } from "@/lib/api";
 import { storage } from "@/lib/firebaseClient";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { useAuth } from "@/context/AuthContext";
 
 interface Document {
   id: string;
@@ -17,9 +18,10 @@ interface Document {
   createdAt: string;
 }
 
-const ORG_ID = "org-001";
-
 export function DocumentsPage() {
+
+  const { org } = useAuth();
+  const ORG_ID = org?.id ?? "org-001";
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
