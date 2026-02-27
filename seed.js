@@ -1,0 +1,112 @@
+#!/usr/bin/env node
+
+/**
+ * Pactura Dev Seed Script
+ * Creates a test user and all five demo orgs with memberships.
+ * Run: npm run seed
+ */
+
+const EMULATOR_AUTH = "http://localhost:9099";
+const EMULATOR_FIRESTORE = "http://localhost:8080";
+const PROJECT_ID = "pactura-dev";
+const API_KEY = "fake-api-key-for-emulator";
+
+const TEST_EMAIL = "test@pactura.ai";
+const TEST_PASSWORD = "password123";
+
+const ORGS = [
+  { id: "org-001", name: "Meridian Defense Solutions", industry: "Federal Contracting" },
+  { id: "org-002", name: "Vantage Financial Group",    industry: "Financial Services"  },
+  { id: "org-003", name: "Meridian Health",            industry: "Healthcare"          },
+  { id: "org-004", name: "Coastal Insurance Group",    industry: "Insurance"           },
+  { id: "org-005", name: "Hargrove & Ellis LLP",       industry: "Legal"               },
+];
+
+const ADMIN_HEADERS = {
+  "Content-Type": "application/json",
+  "Authorization": "Bearer owner",
+};
+
+async function firestoreSet(path, fields) {
+  const url = `${EMULATOR_FIRESTORE}/v1/projects/${PROJECT_ID}/databases/(default)/documents/${path}`;
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: ADMIN_HEADERS,
+    body: JSON.stringify({ fields }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Firestore write failed for ${path}: ${text}`);
+  }
+  return res.json();
+}
+
+async function seed() {
+  console.log("🌱 Seeding Firebase emulators...\n");
+
+  // 1. Create or sign in test user
+  let uid, token;
+
+  const signUpRes = await fetch(
+    `${EMULATOR_AUTH}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD, returnSecureToken: true }),
+    }
+  );
+  const signUpData = await signUpRes.json();
+
+  if (signUpData.localId) {
+    uid = signUpData.localId;
+    token = signUpData.idToken;
+    console.log(`✅ Created user: ${TEST_EMAIL}`);
+  } else {
+    const signInRes = await fetch(
+      `${EMULATOR_AUTH}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD, returnSecureToken: true }),
+      }
+    );
+    const signInData = await signInRes.json();
+    if (!signInData.localId) {
+      console.error("❌ Failed to create or sign in user:", signInData);
+      process.exit(1);
+    }
+    uid = signInData.localId;
+    token = signInData.idToken;
+    console.log(`✅ Signed in existing user: ${TEST_EMAIL}`);
+  }
+
+  console.log("");
+
+  // 2. Create all orgs + memberships
+  for (const org of ORGS) {
+    await firestoreSet(`orgs/${org.id}`, {
+      name:      { stringValue: org.name     },
+      industry:  { stringValue: org.industry },
+      ownerId:   { stringValue: uid          },
+      createdAt: { stringValue: new Date().toISOString() },
+    });
+
+    await firestoreSet(`orgs/${org.id}/memberships/${uid}`, {
+      status:   { stringValue: "active"               },
+      role:     { stringValue: "admin"                },
+      joinedAt: { stringValue: "2026-01-01T00:00:00Z" },
+    });
+
+    console.log(`✅ ${org.name} (${org.id}) — ${org.industry}`);
+  }
+
+  console.log("\n🎉 Seed complete!\n");
+  console.log(`📋 UID:   ${uid}`);
+  console.log(`🔑 TOKEN: ${token}`);
+  console.log(`\nTOKEN="${token}"\n`);
+}
+
+seed().catch((err) => {
+  console.error("Seed failed:", err.message);
+  process.exit(1);
+});

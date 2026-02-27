@@ -7,7 +7,8 @@
     "api:dev": "cd api && npm run start:dev",
     "web:dev": "cd frontend && npm run dev",
     "dev": "concurrently -k -n EMU,API,WEB -c auto \"npm run emulators\" \"npm run web:dev\" \"npm run api:dev\"",
-    "dev:ready": "npm run emulators:wait && echo \"Emulators ready\""
+    "dev:ready": "npm run emulators:wait && echo \"Emulators ready\"",
+    "seed": "node seed.js"
   },
   "devDependencies": {
     "concurrently": "^9.0.0",
