@@ -8,7 +8,6 @@ export class DocumentsService {
   constructor(private readonly firebase: FirebaseService) {}
 
   private async assertMembership(orgId: string, uid: string) {
-    console.log('assertMembership called with:', { orgId, uid });
     const memberRef = this.firebase.firestore
       .collection('orgs')
       .doc(orgId)
