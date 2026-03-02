@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
 import { CurrentUser } from '../common/decorators/user.decorator';
 import type { CreateDocumentDto } from './documents.types';
@@ -28,5 +28,14 @@ export class DocumentsController {
     @CurrentUser() user: any,
   ) {
     return this.documentsService.getDocument(orgId, user.uid, docId);
+  }
+
+  @Delete(':docId')
+  delete(
+    @Param('orgId') orgId: string,
+    @Param('docId') docId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.documentsService.deleteDocument(orgId, user.uid, docId);
   }
 }

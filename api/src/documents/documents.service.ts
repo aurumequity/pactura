@@ -70,4 +70,19 @@ export class DocumentsService {
     if (!snap.exists) throw new ForbiddenException('Document not found');
     return { id: snap.id, ...snap.data() } as DocumentRecord;
   }
+
+  async deleteDocument(
+    orgId: string,
+    uid: string,
+    docId: string,
+  ): Promise<{ success: boolean }> {
+    await this.assertMembership(orgId, uid);
+    await this.firebase.firestore
+      .collection('orgs')
+      .doc(orgId)
+      .collection('documents')
+      .doc(docId)
+      .delete();
+    return { success: true };
+  }
 }
