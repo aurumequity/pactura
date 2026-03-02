@@ -44,3 +44,4 @@ Thumbs.db
 /scripts/
 
 # API dist folder
+/api/.env

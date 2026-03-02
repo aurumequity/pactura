@@ -14,3 +14,13 @@ export interface CreateDocumentDto {
   fileType: string;
   storagePath: string;
 }
+
+export interface AnalysisResult {
+  contractType: string;
+  keyParties: string[];
+  complianceFlags: {
+    label: string;
+    severity: 'info' | 'warning' | 'critical';
+  }[];
+  summary: string;
+}

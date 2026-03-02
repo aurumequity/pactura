@@ -2,6 +2,8 @@ import { Injectable, ForbiddenException } from '@nestjs/common';
 import { FirebaseService } from '../common/firebase/firebase.service';
 import * as admin from 'firebase-admin';
 import { DocumentRecord, CreateDocumentDto } from './documents.types';
+import Anthropic from '@anthropic-ai/sdk';
+import { AnalysisResult } from './documents.types';
 
 @Injectable()
 export class DocumentsService {
@@ -103,4 +105,55 @@ export class DocumentsService {
 
     return { success: true };
   }
+  async analyzeDocument(
+  orgId: string,
+  uid: string,
+  docId: string,
+): Promise<AnalysisResult> {
+  await this.assertMembership(orgId, uid);
+
+  // Fetch the document record so we have name + fileType
+  const doc = await this.getDocument(orgId, uid, docId);
+
+  const client = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  });
+
+  const prompt = `You are a federal contract intelligence engine for Pactura, a document governance platform.
+
+A user has uploaded a document with the following metadata:
+- File name: "${doc.name}"
+- File type: "${doc.fileType}"
+
+Based solely on the filename and file type, infer what you can about this document and return a structured analysis. Be realistic and conservative — if the filename is vague, reflect that uncertainty in your response.
+
+You MUST respond with only a valid JSON object matching this exact shape, no markdown, no explanation:
+{
+  "contractType": "string describing the likely contract or document type",
+  "keyParties": ["array", "of", "likely", "involved", "parties"],
+  "complianceFlags": [
+    { "label": "flag description", "severity": "info" | "warning" | "critical" }
+  ],
+  "summary": "2-3 sentence narrative about this document and its compliance implications"
+}`;
+
+  const message = await client.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  // Extract the text content from Claude's response
+  const rawText = message.content
+    .filter((block) => block.type === 'text')
+    .map((block) => (block as { type: 'text'; text: string }).text)
+    .join('');
+
+  try {
+    return JSON.parse(rawText) as AnalysisResult;
+  } catch {
+    throw new Error('Failed to parse AI analysis response');
+  }
+}
+  
 }

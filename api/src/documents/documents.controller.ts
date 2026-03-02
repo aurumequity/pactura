@@ -38,4 +38,13 @@ export class DocumentsController {
   ) {
     return this.documentsService.deleteDocument(orgId, user.uid, docId);
   }
+
+  @Post(':docId/analyze')
+analyze(
+  @Param('orgId') orgId: string,
+  @Param('docId') docId: string,
+  @CurrentUser() user: any,
+) {
+  return this.documentsService.analyzeDocument(orgId, user.uid, docId);
+}
 }

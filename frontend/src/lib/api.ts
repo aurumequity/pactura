@@ -33,6 +33,7 @@ export async function apiDelete<T>(path: string): Promise<T> {
   const user = auth.currentUser;
   if (!user) throw new Error("Not authenticated");
   const token = await user.getIdToken();
+console.log('DEV TOKEN:', token); // 👈 add this line temporarily
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
