@@ -45,3 +45,9 @@ Thumbs.db
 
 # API dist folder
 /api/.env
+
+# Firebase emulator data (optional, if you want to keep emulator state out of version control)
+/emulator-data/
+
+# Service account keys
+service-account.json
